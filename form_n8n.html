@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulário JSON</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <style>
+    .help-text {
+      font-size: 0.9em;
+      color: #6c757d;
+    }
+    .hidden {
+      display: none;
+    }
+    .container {
+      max-width: 800px;
+    }
+    h3 {
+      border-bottom: 2px solid #007BFF;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    .form-group button {
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container mt-5">
+  <h2>Formulário JSON</h2>
+  <form id="jsonForm">
+    <!-- Contato -->
+    <div class="form-group">
+      <label for="token">Token:</label>
+      <input type="text" class="form-control" id="token" name="token" required>
+      <small class="help-text">Token de autenticação da API.</small>
+    </div>
+    <div class="form-group">
+      <label for="url_whaticket">URL Whaticket:</label>
+      <input type="text" class="form-control" id="url_whaticket" name="url_whaticket" required>
+      <small class="help-text">URL do serviço Whaticket.</small>
+    </div>
+    <div class="form-group">
+      <label for="nome">Nome:</label>
+      <input type="text" class="form-control" id="nome" name="nome" value="{{nome}}" required>
+      <small class="help-text">Nome do contato.</small>
+    </div>
+    <div class="form-group">
+      <label for="telefone">Telefone:</label>
+      <input type="text" class="form-control" id="telefone" name="telefone" value="{{telefone}}" required>
+      <small class="help-text">Número de telefone do contato com código do país.</small>
+    </div>
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input type="email" class="form-control" id="email" name="email">
+      <small class="help-text">Endereço de email do contato.</small>
+    </div>
+    <div class="form-group">
+      <label for="carteiraId">Carteira ID:</label>
+      <input type="text" class="form-control" id="carteiraId" name="carteiraId">
+      <small class="help-text">ID da carteira (se houver).</small>
+    </div>
+
+    <!-- Extra Info -->
+    <div id="extraInfoContainer">
+      <h3>Extra Info</h3>
+      <div class="extra-info-group">
+        <div class="form-group">
+          <label for="extraInfoName1">Nome:</label>
+          <input type="text" class="form-control" id="extraInfoName1" name="extraInfoName[]" value="Pais" required>
+          <small class="help-text">Nome da informação adicional.</small>
+        </div>
+        <div class="form-group">
+          <label for="extraInfoValue1">Valor:</label>
+          <input type="text" class="form-control" id="extraInfoValue1" name="extraInfoValue[]" value="Agregar Pais" required>
+          <small class="help-text">Valor da informação adicional.</small>
+        </div>
+        <button type="button" class="btn btn-danger mb-3" onclick="removeExtraInfo(this)">Remover</button>
+      </div>
+    </div>
+    <button type="button" class="btn btn-secondary mb-3" onclick="addExtraInfo()">Adicionar Extra Info</button>
+
+    <!-- Conversa -->
+    <div class="form-group">
+      <label for="type">Tipo de Conversa:</label>
+      <select class="form-control" id="type" name="type" required onchange="updateFormFields()">
+        <option value="1">Texto</option>
+        <option value="2">Imagem</option>
+        <option value="3">Vídeo</option>
+        <option value="4">Áudio</option>
+        <option value="5">Documento</option>
+        <option value="6">Ligação (apenas um toque) e Texto</option>
+      </select>
+      <small class="help-text">Selecione o tipo de conversa.</small>
+    </div>
+    <div class="form-group">
+      <label for="message">Mensagem:</label>
+      <textarea class="form-control" id="message" name="message" required></textarea>
+      <small class="help-text">Mensagem inicial da conversa.</small>
+    </div>
+    <div id="mediaFields">
+      <div class="form-group">
+        <label for="media">URL da Mídia:</label>
+        <input type="text" class="form-control" id="media" name="media" value="https://api.totalchat.co/public/logotipos/interno.png">
+        <small class="help-text">URL da mídia a ser enviada na conversa.</small>
+      </div>
+      <div class="form-group">
+        <label for="mimeType">Tipo MIME:</label>
+        <input type="text" class="form-control" id="mimeType" name="mimeType" value="image/jpeg" readonly>
+        <small class="help-text">Tipo MIME da mídia.</small>
+      </div>
+      <div class="form-group">
+        <label for="caption">Legenda:</label>
+        <input type="text" class="form-control" id="caption" name="caption" value="LEGENDA">
+        <small class="help-text">Legenda para a mídia.</small>
+      </div>
+      <div class="form-group">
+        <label for="ptt">PTT:</label>
+        <input type="checkbox" class="form-check-input" id="ptt" name="ptt">
+        <small class="help-text">Indica se é uma mensagem de áudio (push-to-talk).</small>
+      </div>
+      <div class="form-group">
+        <label for="fileName">Nome do Arquivo:</label>
+        <input type="text" class="form-control" id="fileName" name="fileName" value="NOME DO ARQUIVO">
+        <small class="help-text">Nome do arquivo.</small>
+      </div>
+    </div>
+
+    <!-- Ticket -->
+    <div class="form-group">
+      <label for="openTicket">Abrir Ticket:</label>
+      <input type="number" class="form-control" id="openTicket" name="openTicket" value="1" required>
+      <small class="help-text">Indicador de abertura de ticket: 1 = Abre um novo ticket, 0 = Não abre um novo ticket.</small>
+    </div>
+    <div class="form-group">
+      <label for="queueId">Queue ID:</label>
+      <input type="number" class="form-control" id="queueId" name="queueId">
+      <small class="help-text">ID da fila (se houver).</small>
+    </div>
+    <div class="form-group hidden">
+      <label for="typebot_sessionId">ID da Sessão do Bot:</label>
+      <input type="text" class="form-control" id="typebot_sessionId" name="typebot_sessionId">
+    </div>
+    <div class="form-group hidden">
+      <label for="customA">Custom A:</label>
+      <input type="text" class="form-control" id="customA" name="customA" value="Evento">
+    </div>
+    <div class="form-group hidden">
+      <label for="customB">Custom B:</label>
+      <input type="text" class="form-control" id="customB" name="customB" value="Bombacha">
+    </div>
+
+    <!-- Tags -->
+    <div id="tagsContainer">
+      <h3>Tags</h3>
+      <div class="tag-group">
+        <div class="form-group">
+          <label for="tagId1">ID da Tag:</label>
+          <input type="number" class="form-control" id="tagId1" name="tagId[]" value="13" required>
+          <small class="help-text">ID da tag.</small>
+        </div>
+        <button type="button" class="btn btn-danger mb-3" onclick="removeTag(this)">Remover</button>
+      </div>
+    </div>
+    <button type="button" class="btn btn-secondary mb-3" onclick="addTag()">Adicionar Tag</button>
+
+    <button type="submit" class="btn btn-primary">Gerar JSON</button>
+  </form>
+  <pre id="output" class="mt-3"></pre>
+</div>
+
+<script>
+  function addExtraInfo() {
+    const extraInfoContainer = document.getElementById('extraInfoContainer');
+    const index = extraInfoContainer.children.length / 3 + 1;
+    const extraInfoGroup = document.createElement('div');
+    extraInfoGroup.className = 'extra-info-group';
+    extraInfoGroup.innerHTML = `
+      <div class="form-group">
+        <label for="extraInfoName${index}">Nome:</label>
+        <input type="text" class="form-control" id="extraInfoName${index}" name="extraInfoName[]" required>
+        <small class="help-text">Nome da informação adicional.</small>
+      </div>
+      <div class="form-group">
+        <label for="extraInfoValue${index}">Valor:</label>
+        <input type="text" class="form-control" id="extraInfoValue${index}" name="extraInfoValue[]" required>
+        <small class="help-text">Valor da informação adicional.</small>
+      </div>
+      <button type="button" class="btn btn-danger mb-3" onclick="removeExtraInfo(this)">Remover</button>
+    `;
+    extraInfoContainer.appendChild(extraInfoGroup);
+  }
+
+  function removeExtraInfo(button) {
+    button.parentElement.remove();
+  }
+
+  function addTag() {
+    const tagsContainer = document.getElementById('tagsContainer');
+    const index = tagsContainer.children.length / 2 + 1;
+    const tagGroup = document.createElement('div');
+    tagGroup.className = 'tag-group';
+    tagGroup.innerHTML = `
+      <div class="form-group">
+        <label for="tagId${index}">ID da Tag:</label>
+        <input type="number" class="form-control" id="tagId${index}" name="tagId[]" required>
+        <small class="help-text">ID da tag.</small>
+      </div>
+      <button type="button" class="btn btn-danger mb-3" onclick="removeTag(this)">Remover</button>
+    `;
+    tagsContainer.appendChild(tagGroup);
+  }
+
+  function removeTag(button) {
+    button.parentElement.remove();
+  }
+
+  function updateFormFields() {
+    const type = document.getElementById('type').value;
+    const mediaFields = document.getElementById('mediaFields');
+    const mimeType = document.getElementById('mimeType');
+    
+    if (type == 1) {
+      mediaFields.style.display = 'none';
+    } else {
+      mediaFields.style.display = 'block';
+      
+      const caption = document.getElementById('caption');
+      const ptt = document.getElementById('ptt');
+      const fileName = document.getElementById('fileName');
+      
+      if (type == 2) {
+        mimeType.value = 'image/jpeg';
+        caption.parentElement.style.display = 'block';
+        ptt.parentElement.style.display = 'none';
+        fileName.parentElement.style.display = 'none';
+      } else if (type == 3) {
+        mimeType.value = 'video/mp4';
+        caption.parentElement.style.display = 'block';
+        ptt.parentElement.style.display = 'none';
+        fileName.parentElement.style.display = 'none';
+      } else if (type == 4) {
+        mimeType.value = 'audio/mpeg';
+        caption.parentElement.style.display = 'none';
+        ptt.parentElement.style.display = 'block';
+        fileName.parentElement.style.display = 'none';
+      } else if (type == 5) {
+        mimeType.value = 'application/pdf';
+        caption.parentElement.style.display = 'none';
+        ptt.parentElement.style.display = 'none';
+        fileName.parentElement.style.display = 'block';
+      }
+    }
+  }
+
+  document.getElementById('jsonForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    const token = document.getElementById('token').value;
+    const urlWhaticket = document.getElementById('url_whaticket').value;
+    const nome = document.getElementById('nome').value;
+    const telefone = document.getElementById('telefone').value;
+    const email = document.getElementById('email').value;
+    const carteiraId = document.getElementById('carteiraId').value;
+    const type = document.getElementById('type').value;
+    const message = document.getElementById('message').value;
+    const media = document.getElementById('media').value;
+    const mimeType = document.getElementById('mimeType').value;
+    const caption = document.getElementById('caption').value;
+    const ptt = document.getElementById('ptt').checked;
+    const fileName = document.getElementById('fileName').value;
+    const openTicket = document.getElementById('openTicket').value;
+    const queueId = document.getElementById('queueId').value;
+    const typebotSessionId = document.getElementById('typebot_sessionId').value;
+    const customA = document.getElementById('customA').value;
+    const customB = document.getElementById('customB').value;
+
+    const extraInfoNames = document.getElementsByName('extraInfoName[]');
+    const extraInfoValues = document.getElementsByName('extraInfoValue[]');
+    const extraInfo = [];
+    for (let i = 0; i < extraInfoNames.length; i++) {
+      extraInfo.push({
+        name: extraInfoNames[i].value,
+        value: extraInfoValues[i].value
+      });
+    }
+
+    const tagIds = document.getElementsByName('tagId[]');
+    const tags = [];
+    for (let i = 0; i < tagIds.length; i++) {
+      tags.push({
+        id: tagIds[i].value
+      });
+    }
+
+    const jsonBody = {
+      "token": token,
+      "url_whaticket": urlWhaticket,
+      "contato": {
+        "name": nome,
+        "phone": telefone,
+        "email": email || "",
+        "carteiraId": carteiraId || null,
+        "extraInfo": extraInfo
+      },
+      "conversa": {
+        "type": parseInt(type),
+        "message": message,
+        "media": media,
+        "mimeType": mimeType,
+        "caption": caption,
+        "ptt": ptt,
+        "fileName": fileName
+      },
+      "ticket": {
+        "openTicket": parseInt(openTicket),
+        "queueId": parseInt(queueId) || null,
+        "typebot_sessionId": typebotSessionId || null,
+        "campos": {
+          "customA": customA,
+          "customB": customB
+        }
+      },
+      "tags": {
+        "tags": tags
+      }
+    };
+
+    document.getElementById('output').textContent = JSON.stringify(jsonBody, null, 2);
+  });
+
+  updateFormFields();
+</script>
+
+</body>
+</html>
